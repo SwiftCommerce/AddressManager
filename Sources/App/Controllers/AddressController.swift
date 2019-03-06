@@ -2,10 +2,12 @@ import Vapor
 import FluentMySQL
 
 final class AddressController: RouteCollection {
-    let connection: MySQLConnection
+    typealias ConnectionPool = DatabaseConnectionPool<ConfiguredDatabase<MySQLDatabase>>
     
-    init(connection: MySQLConnection) {
-        self.connection = connection
+    let pool: ConnectionPool
+    
+    init(pool: ConnectionPool) {
+        self.pool = pool
     }
     
     func boot(router: Router) throws {
@@ -18,7 +20,7 @@ final class AddressController: RouteCollection {
     }
     
     func create(_ request: Request, content: AddressContent)throws -> Future<AddressContent> {
-        return content.save(on: self.connection)
+        return self.pool.withConnection(content.save)
     }
     
     func read(_ request: Request)throws -> Future<AddressContent> {
@@ -27,14 +29,16 @@ final class AddressController: RouteCollection {
     
     func update(_ request: Request, content: AddressContent)throws -> Future<AddressContent> {
         let id = try request.parameters.next(Address.ID.self)
-        return content.update(id, on: self.connection)
+        return self.pool.withConnection { conn in content.update(id, on: conn) }
     }
     
     func delete(_ request: Request)throws -> Future<HTTPStatus> {
         let id = try request.parameters.next(Address.ID.self)
-        let street = Street.query(on: self.connection).filter(\.id == id).delete()
-        let address = Address.query(on: self.connection).filter(\.id == id).delete()
-        
-        return map(address, street) { _, _ in return HTTPStatus.noContent }
+        return self.pool.withConnection { conn in
+            let street = Street.query(on: conn).filter(\.id == id).delete()
+            let address = Address.query(on: conn).filter(\.id == id).delete()
+            
+            return map(address, street) { _, _ in return HTTPStatus.noContent }
+        }
     }
 }
