@@ -22,6 +22,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(databasesConfig)
 
     // Configure migrations
-    var migrations = MigrationConfig()
-    services.register(migrations)
+    var migrationsConfig = MigrationConfig()
+    try migrations(config: &migrationsConfig)
+    services.register(migrationsConfig)
 }
