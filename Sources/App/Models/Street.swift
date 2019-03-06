@@ -1,6 +1,8 @@
 import FluentMySQL
 
 final class Street {
+    static let name = "streets"
+    
     var id: Int?
     let address: Address.ID
     

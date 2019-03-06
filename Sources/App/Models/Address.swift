@@ -2,6 +2,8 @@ import FluentMySQL
 
 // https://stackoverflow.com/questions/1159756/how-should-international-geographical-addresses-be-stored-in-a-relational-databa/1160031#1160031
 final class Address {
+    static let name = "addresses"
+    
     var id: Int?
     
     var buildingName: String?
