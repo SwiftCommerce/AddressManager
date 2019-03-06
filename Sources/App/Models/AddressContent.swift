@@ -2,6 +2,7 @@ import Vapor
 import Fluent
 
 struct AddressContent: Content, Parameter {
+    var id: Int?
     var buildingName: String?
     var typeIdentifier: String?
     var type: String?
@@ -10,9 +11,18 @@ struct AddressContent: Content, Parameter {
     var district: String?
     var postalArea: String?
     var country: String?
-    var street: Street
+    var street: Street?
     
-    static func find(_ id: Address.ID, on conn: DatabaseConnectable) -> Future<AddressContent> {
+    func update(_ id: Address.ID, on conn: DatabaseConnectable) -> EventLoopFuture<AddressContent> {
+        let address = Address.query(on: conn).filter(\.id == id).update(data: self)
+        let street = Street.query(on: conn).filter(\.address == id).update(data: self.street)
+        
+        return flatMap(address, street) { _, _ in
+            return AddressContent.find(id, on: conn)
+        }
+    }
+    
+    static func find(_ id: Address.ID, on conn: DatabaseConnectable) -> EventLoopFuture<AddressContent> {
         let query = Address.query(on: conn).join(\Address.id, to: \Street.address).filter(\.id == id).alsoDecode(Street.self)
         
         return query.first().map { data in
@@ -21,6 +31,7 @@ struct AddressContent: Content, Parameter {
             }
             
             return AddressContent(
+                id: address.id,
                 buildingName: address.buildingName,
                 typeIdentifier: address.typeIdentifier,
                 type: address.type,
