@@ -9,4 +9,8 @@ enum Direction: String, CaseIterable, MySQLEnumType {
     case northWest = "NW"
     case southEast = "SE"
     case southWest = "SW"
+    
+    public static var mysqlDataType: MySQLDataType {
+        return .enum(Direction.allCases.map { $0.rawValue })
+    }
 }
