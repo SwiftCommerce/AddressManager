@@ -11,7 +11,33 @@ struct AddressContent: Content, Parameter {
     var district: String?
     var postalArea: String?
     var country: String?
-    var street: Street?
+    var street: StreetContent?
+    
+    func save(on conn: DatabaseConnectable) -> EventLoopFuture<AddressContent> {
+        let address = Address(
+            buildingName: self.buildingName,
+            typeIdentifier: self.typeIdentifier,
+            type: self.type,
+            municipality: self.municipality,
+            city: self.city,
+            district: self.district,
+            postalArea: self.postalArea,
+            country: self.country
+        )
+        
+        let street = { (address: Int) -> Street in
+            return Street(
+                number: self.street?.number,
+                numberSuffix: self.street?.numberSuffix,
+                name: self.street?.name,
+                type: self.street?.type,
+                direction: self.street?.direction,
+                address: address
+            )
+        }
+        
+        return address.save(on: conn).flatMap { try street($0.requireID()).save(on: conn) }.transform(to: self)
+    }
     
     func update(_ id: Address.ID, on conn: DatabaseConnectable) -> EventLoopFuture<AddressContent> {
         let address = Address.query(on: conn).filter(\.id == id).update(data: self)
@@ -40,7 +66,14 @@ struct AddressContent: Content, Parameter {
                 district: address.district,
                 postalArea: address.postalArea,
                 country: address.country,
-                street: street
+                street: StreetContent(
+                    id: street.id,
+                    number: street.number,
+                    numberSuffix: street.numberSuffix,
+                    name: street.name,
+                    type: street.type,
+                    direction: street.direction
+                )
             )
         }
     }
