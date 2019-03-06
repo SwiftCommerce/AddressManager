@@ -24,5 +24,31 @@ final class Street {
     }
 }
 
-extension Street: Migration { }
+extension Street: Migration {
+    static func prepare(on conn: MySQLDatabase.Connection) -> Future<Void> {
+        return Database.create(Street.self, on: conn) { builder in
+            builder.field(for: \.id, isIdentifier: true)
+            builder.field(for: \.address)
+            builder.field(for: \.number)
+            builder.field(for: \.numberSuffix)
+            builder.field(for: \.type)
+            builder.field(for: \.direction)
+            
+            // For some reason, reflecting the `name` property fails, so we have
+            // to add the column manually.
+            builder.field(
+                .columnDefinition(
+                    .column(
+                        .table(MySQLIdentifier(Street.name)),
+                        MySQLIdentifier("name")
+                    ),
+                    .varchar(255, characterSet: nil, collate: nil),
+                    []
+                )
+            )
+            
+            builder.reference(from: \.address, to: \Address.id)
+        }
+    }
+}
 extension Street: MySQLModel { }
