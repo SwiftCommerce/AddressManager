@@ -11,4 +11,8 @@ func databases(config: inout DatabasesConfig, env: Environment)throws {
     )
     let mysql = MySQLDatabase(config: mysqlConfig)
     config.add(database: mysql, as: .mysql)
+
+    if Environment.get("DATABASE_LOGGING").flatMap(Bool.init) ?? false {
+        config.enableLogging(on: .mysql)
+    }
 }
