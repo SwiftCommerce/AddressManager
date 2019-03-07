@@ -57,7 +57,7 @@ final class MySQLAddressRepository: AddressRepository {
     
     func find(address id: Int) -> EventLoopFuture<AddressContent?> {
         let result = self.pool.withConnection { conn -> EventLoopFuture<(Address, Street)?> in
-            let q = Address.query(on: conn).join(\Address.id, to: \Street.address).filter(\.id == id).alsoDecode(Street.self)
+            let q = Address.query(on: conn).join(\Street.address, to: \Address.id).filter(\.id == id).alsoDecode(Street.self)
             return q.first()
         }
         
