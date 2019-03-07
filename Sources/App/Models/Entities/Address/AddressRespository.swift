@@ -51,7 +51,13 @@ final class MySQLAddressRepository: AddressRepository {
                 let savedStreet = savedAddress.map { try street($0.requireID()) }.save(on: transaction)
                 
                 return savedAddress.and(savedStreet)
-            }.transform(to: content)
+            }.map { saved in
+                var response = content
+                response.id = saved.0.id
+                response.street?.id = saved.1.id
+                
+                return response
+            }
         }
     }
     
