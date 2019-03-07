@@ -1,6 +1,5 @@
 import JSON
-import Vapor
-import Fluent
+import Service
 import FluentMySQL
 
 protocol AddressRepository: ServiceType {
