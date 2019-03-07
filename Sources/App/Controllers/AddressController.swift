@@ -3,9 +3,11 @@ import FluentMySQL
 
 final class AddressController: RouteCollection {
     let repository: AddressRepository
+    let validator: AddressValidator
     
-    init(repository: AddressRepository) {
+    init(repository: AddressRepository, validator: AddressValidator) {
         self.repository = repository
+        self.validator = validator
     }
     
     func boot(router: Router) throws {

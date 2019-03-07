@@ -6,5 +6,6 @@ public func routes(_ router: Router, _ container: Container) throws {
         return "All good!"
     }
     
-    try router.register(collection: AddressController(repository: container.make()))
+    let addresses = try AddressController(repository: container.make(), validator: container.make())
+    try router.register(collection: addresses)
 }
