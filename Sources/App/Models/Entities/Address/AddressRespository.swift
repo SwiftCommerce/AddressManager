@@ -1,3 +1,4 @@
+import JSON
 import Vapor
 import Fluent
 import FluentMySQL
@@ -95,8 +96,17 @@ final class MySQLAddressRepository: AddressRepository {
     func update(address id: Address.ID, with content: AddressContent) -> EventLoopFuture<AddressContent?> {
         let updated = self.pool.withConnection { conn -> EventLoopFuture<Address.ID> in
             return conn.transaction(on: .mysql) { transaction in
-                let address = Address.query(on: transaction).filter(\.id == id).update(data: content)
-                let street = Street.query(on: transaction).filter(\.address == id).update(data: content.street)
+                
+                let addressJSON = try JSONCoder.encode(content)
+                let address = Address.query(on: transaction).filter(\.id == id).update(data: addressJSON)
+                
+                let streetJSON = try addressJSON.element(at: ["street"])
+                let street: Future<Void>
+                if streetJSON == .null {
+                    street = conn.future()
+                } else {
+                    street = Street.query(on: transaction).filter(\.address == id).update(data: streetJSON)
+                }
                 
                 return address.and(street).transform(to: id)
             }
