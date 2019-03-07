@@ -1,7 +1,7 @@
 import Vapor
 
 func setupRepositories(services: inout Services, config: inout Config) {
-    services.register(MySQLAddressRepository.self)
+    services.register(AddressRepository.self, factory: MySQLAddressRepository.makeService)
     
     preferDatabases(config: &config)
 }
