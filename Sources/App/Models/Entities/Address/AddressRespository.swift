@@ -14,13 +14,22 @@ final class MySQLAddressRepository: AddressRepository {
     typealias ConnectionPool = DatabaseConnectionPool<ConfiguredDatabase<MySQLDatabase>>
     
     let pool: ConnectionPool
+    let validator: AddressValidator?
     
-    init(pool: ConnectionPool) {
+    init(pool: ConnectionPool, validator: AddressValidator?) {
         self.pool = pool
+        self.validator = validator
     }
     
     static func makeService(for container: Container) throws -> MySQLAddressRepository {
-        return try MySQLAddressRepository(pool: container.connectionPool(to: .mysql))
+        return MySQLAddressRepository(
+            pool: try container.connectionPool(to: .mysql),
+            validator: try? container.make()
+        )
+    }
+    
+    private func validate(_ address: AddressContent, on worker: Worker) -> Future<Void> {
+        return self.validator?.validate(address: address) ?? worker.future()
     }
     
     func create(address content: AddressContent) -> EventLoopFuture<AddressContent> {
@@ -51,7 +60,9 @@ final class MySQLAddressRepository: AddressRepository {
                 let savedAddress = address.save(on: transaction)
                 let savedStreet = savedAddress.map { try street($0.requireID()) }.save(on: transaction)
                 
-                return savedAddress.and(savedStreet)
+                return savedAddress.and(savedStreet).flatMap { saved in
+                    return self.validate(content, on: transaction).transform(to: saved)
+                }
             }.map { saved in
                 var response = content
                 response.id = saved.0.id
@@ -75,7 +86,7 @@ final class MySQLAddressRepository: AddressRepository {
     }
     
     func update(address id: Address.ID, with content: AddressContent) -> EventLoopFuture<AddressContent?> {
-        let updated = self.pool.withConnection { conn -> EventLoopFuture<Address.ID> in
+        return self.pool.withConnection { conn -> EventLoopFuture<AddressContent?> in
             return conn.transaction(on: .mysql) { transaction in
                 
                 let addressJSON = try JSONCoder.encode(content)
@@ -89,11 +100,14 @@ final class MySQLAddressRepository: AddressRepository {
                     street = Street.query(on: transaction).filter(\.address == id).update(data: streetJSON)
                 }
                 
-                return address.and(street).transform(to: id)
+                return address.and(street).transform(to: id).flatMap(self.find(address:)).flatMap { content in
+                    guard let content = content else {
+                        return transaction.future(nil)
+                    }
+                    return self.validate(content, on: transaction).transform(to: content)
+                }
             }
         }
-        
-        return updated.flatMap(self.find(address:))
     }
     
     func delete(address id: Address.ID) -> EventLoopFuture<Void> {
