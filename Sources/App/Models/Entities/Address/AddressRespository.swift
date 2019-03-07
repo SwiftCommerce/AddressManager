@@ -45,8 +45,13 @@ final class MySQLAddressRepository: AddressRepository {
             )
         }
         
-        return self.pool.withConnection { conn in
-            return address.save(on: conn).flatMap { try street($0.requireID()).save(on: conn) }.transform(to: content)
+        return self.pool.withConnection { conn -> EventLoopFuture<AddressContent> in
+            return conn.transaction(on: .mysql) { transaction -> EventLoopFuture<(Address, Street)> in
+                let savedAddress = address.save(on: transaction)
+                let savedStreet = savedAddress.map { try street($0.requireID()) }.save(on: transaction)
+                
+                return savedAddress.and(savedStreet)
+            }.transform(to: content)
         }
     }
     
@@ -83,10 +88,12 @@ final class MySQLAddressRepository: AddressRepository {
     
     func update(address id: Address.ID, with content: AddressContent) -> EventLoopFuture<AddressContent?> {
         let updated = self.pool.withConnection { conn -> EventLoopFuture<Address.ID> in
-            let address = Address.query(on: conn).filter(\.id == id).update(data: content)
-            let street = Street.query(on: conn).filter(\.address == id).update(data: content.street)
-            
-            return address.and(street).transform(to: id)
+            return conn.transaction(on: .mysql) { transaction in
+                let address = Address.query(on: transaction).filter(\.id == id).update(data: content)
+                let street = Street.query(on: transaction).filter(\.address == id).update(data: content.street)
+                
+                return address.and(street).transform(to: id)
+            }
         }
         
         return updated.flatMap(self.find(address:))
@@ -94,10 +101,12 @@ final class MySQLAddressRepository: AddressRepository {
     
     func delete(address id: Address.ID) -> EventLoopFuture<Void> {
         return self.pool.withConnection { conn in
-            let address = Address.query(on: conn).filter(\.id == id).delete()
-            let street = Street.query(on: conn).filter(\.address == id).delete()
-            
-            return address.and(street).transform(to: ())
+            return conn.transaction(on: .mysql) { transaction in
+                let address = Address.query(on: transaction).filter(\.id == id).delete()
+                let street = Street.query(on: transaction).filter(\.address == id).delete()
+                
+                return address.and(street).transform(to: ())
+            }
         }
     }
 }
