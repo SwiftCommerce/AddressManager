@@ -1,4 +1,4 @@
-import Vapor
+import Service
 
 // MARK: - Protocol
 
