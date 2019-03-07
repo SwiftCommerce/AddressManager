@@ -118,8 +118,8 @@ final class MySQLAddressRepository: AddressRepository {
     func delete(address id: Address.ID) -> EventLoopFuture<Void> {
         return self.pool.withConnection { conn in
             return conn.transaction(on: .mysql) { transaction in
-                let address = Address.query(on: transaction).filter(\.id == id).delete()
                 let street = Street.query(on: transaction).filter(\.address == id).delete()
+                let address = Address.query(on: transaction).filter(\.id == id).delete()
                 
                 return address.and(street).transform(to: ())
             }
