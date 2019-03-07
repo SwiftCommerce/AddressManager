@@ -30,4 +30,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     
     // Add repository models to services
     setupRepositories(services: &services, config: &config)
+    
+    // Regiaster the address validation service used by the `AddressController`.
+    services.register(AddressValidator.self, factory: EmptyAddressValidator.makeService)
 }
