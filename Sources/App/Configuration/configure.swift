@@ -27,4 +27,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     var migrationsConfig = MigrationConfig()
     try migrations(config: &migrationsConfig)
     services.register(migrationsConfig)
+    
+    // Add repository models to services
+    setupRepositories(services: &services, config: &config)
 }
