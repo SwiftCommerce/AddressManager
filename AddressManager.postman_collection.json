@@ -1,0 +1,324 @@
+{
+	"info": {
+		"_postman_id": "49db3543-d5fb-4247-84d7-ed1d0ff25997",
+		"name": "Address Manager",
+		"description": "Address Manager is a micro-service that stores international address information.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Address",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d1dbaab9-24ef-46b5-b0d1-ebb2ea58bc7d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Set `address` env var\", function () {",
+							"    var json = pm.response.json();",
+							"    ",
+							"    pm.expect(json.id).to.not.eql(null);",
+							"    pm.environment.set(\"address\", json.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"city\": \"Cupertino\",\n\t\"district\": \"California\",\n\t\"postalArea\": \"95014\",\n\t\"county\": \"United States\",\n\t\"street\": {\n\t\t\"name\": \"Infinite\",\n\t\t\"type\": \"Loop\"\n\t}\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/addresses/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"addresses",
+						""
+					]
+				},
+				"description": "Creates a new `Address` model."
+			},
+			"response": [
+				{
+					"name": "Create Address",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"city\": \"Cupertino\",\n\t\"district\": \"California\",\n\t\"postalArea\": \"95014\",\n\t\"county\": \"United States\",\n\t\"street\": {\n\t\t\"name\": \"Infinite\",\n\t\t\"type\": \"Loop\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8080/v1/addresses/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"v1",
+								"addresses",
+								""
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "content-length",
+							"value": "108"
+						},
+						{
+							"key": "date",
+							"value": "Thu, 07 Mar 2019 15:11:27 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"district\": \"California\",\n    \"postalArea\": \"95014\",\n    \"street\": {\n        \"name\": \"Infinite\",\n        \"type\": \"Loop\"\n    },\n    \"city\": \"Cupertino\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Address",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "36b061d2-c46f-402d-a0d5-8ba3de27d390",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Address ID is equal to `address` var\", function () {",
+							"    var json = pm.response.json();",
+							"    var address = parseInt(pm.environment.get(\"address\"));",
+							"    ",
+							"    pm.expect(json.id).to.eql(address);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/addresses/{{address}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"addresses",
+						"{{address}}"
+					]
+				},
+				"description": "Gets the `Address` model data for a given ID."
+			},
+			"response": [
+				{
+					"name": "Get Address",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8080/v1/addresses/{{address}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"v1",
+								"addresses",
+								"{{address}}"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "content-length",
+							"value": "104"
+						},
+						{
+							"key": "date",
+							"value": "Thu, 07 Mar 2019 15:22:26 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"district\": \"California\",\n    \"id\": 2,\n    \"postalArea\": \"95014\",\n    \"street\": {\n        \"id\": 2,\n        \"type\": \"Loop\"\n    },\n    \"city\": \"Cupertino\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Updated Address",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a698dc01-04fa-4e6d-b886-690700f7a8a4",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Address ID is equal to `address` var\", function () {",
+							"    var json = pm.response.json();",
+							"    var address = parseInt(pm.environment.get(\"address\"));",
+							"    ",
+							"    pm.expect(json.id).to.eql(address);",
+							"});",
+							"",
+							"pm.test(\"Address.buildingName is equal to 'Apple Campus'\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.buildingName).to.eql(\"Apple Campus\");",
+							"});",
+							"",
+							"pm.test(\"Address.city is equal to 'Cupertino'\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.city).to.eql(\"Cupertino\");",
+							"});",
+							"",
+							"pm.test(\"Address.street.type is equal to 'Loop'\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.street.type).to.eql(\"Loop\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"buildingName\": \"Apple Campus\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/addresses/{{address}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"addresses",
+						"{{address}}"
+					]
+				},
+				"description": "Updates the properties of an `Address` model."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Addresses",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "3e82f537-71a3-496f-8b95-3a3c73b37c88",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/addresses/{{address}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"addresses",
+						"{{address}}"
+					]
+				},
+				"description": "Deletes an existing `Address` model by ID."
+			},
+			"response": []
+		}
+	]
+}
