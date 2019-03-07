@@ -6,9 +6,5 @@ public func routes(_ router: Router, _ container: Container) throws {
         return "All good!"
     }
     
-    try router.register(
-        collection: AddressController(
-            pool: container.connectionPool(to: .mysql)
-        )
-    )
+    try router.register(collection: AddressController(repository: container.make()))
 }

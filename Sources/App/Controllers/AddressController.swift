@@ -2,43 +2,44 @@ import Vapor
 import FluentMySQL
 
 final class AddressController: RouteCollection {
-    typealias ConnectionPool = DatabaseConnectionPool<ConfiguredDatabase<MySQLDatabase>>
+    let repository: AddressRepository
     
-    let pool: ConnectionPool
-    
-    init(pool: ConnectionPool) {
-        self.pool = pool
+    init(repository: AddressRepository) {
+        self.repository = repository
     }
     
     func boot(router: Router) throws {
         let addresses = router.grouped(any, "addresses")
         
         addresses.post(AddressContent.self, use: create)
-        addresses.get(AddressContent.parameter, use: read)
-        addresses.patch(AddressContent.self, at: Address.ID.parameter, use: update)
-        addresses.delete(Address.ID.parameter, use: delete)
+        addresses.get(Address.parameter, use: read)
+        addresses.patch(AddressContent.self, at: Address.parameter, use: update)
+        addresses.delete(Address.parameter, use: delete)
     }
     
     func create(_ request: Request, content: AddressContent)throws -> Future<AddressContent> {
-        return self.pool.withConnection(content.save)
+        return self.repository.create(address: content)
     }
     
     func read(_ request: Request)throws -> Future<AddressContent> {
-        return try request.parameters.next(AddressContent.self)
+        return try self.repository.find(address: request.addressID()).unwrap(or: Abort(.notFound))
     }
     
     func update(_ request: Request, content: AddressContent)throws -> Future<AddressContent> {
-        let id = try request.parameters.next(Address.ID.self)
-        return self.pool.withConnection { conn in content.update(id, on: conn) }
+        return try self.repository.update(address: request.addressID(), with: content).unwrap(or: Abort(.notFound))
     }
     
     func delete(_ request: Request)throws -> Future<HTTPStatus> {
-        let id = try request.parameters.next(Address.ID.self)
-        return self.pool.withConnection { conn in
-            let street = Street.query(on: conn).filter(\.id == id).delete()
-            let address = Address.query(on: conn).filter(\.id == id).delete()
-            
-            return map(address, street) { _, _ in return HTTPStatus.noContent }
+        return try self.repository.delete(address: request.addressID()).transform(to: .noContent)
+    }
+}
+
+extension Request {
+    fileprivate func addressID()throws -> Address.ID {
+        guard let raw = self.parameters.rawValues(for: Address.self).first, let id = Address.ID(raw) else {
+            throw Abort(.badRequest, reason: "`:address` URL request parameter must be convertible to `int`")
         }
+        
+        return id
     }
 }
