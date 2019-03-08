@@ -17,6 +17,13 @@ extension Application {
         try App.boot(app)
         return app
     }
+    
+    func response(for http: HTTPRequest)throws -> Response {
+        let responder = try self.make(Responder.self)
+        let request = Request(http: http, using: self)
+        
+        return try responder.respond(to: request).wait()
+    }
 }
 
 func caseStart(_ file: String = #file, _ function: String = #function) {
