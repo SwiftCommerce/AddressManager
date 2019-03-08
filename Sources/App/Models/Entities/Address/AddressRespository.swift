@@ -80,7 +80,26 @@ final class MySQLAddressRepository: AddressRepository {
         
         return result.map { result in
             guard let (address, street) = result else { return nil }
-            return AddressContent(address: address, street: street)
+            
+            return AddressContent(
+                id: address.id,
+                buildingName: address.buildingName,
+                typeIdentifier: address.typeIdentifier,
+                type: address.type,
+                municipality: address.municipality,
+                city: address.city,
+                district: address.district,
+                postalArea: address.postalArea,
+                country: address.country,
+                street: StreetContent(
+                    id: street.id,
+                    number: street.number,
+                    numberSuffix: street.numberSuffix,
+                    name: street.name,
+                    type: street.type,
+                    direction: street.direction
+                )
+            )
         }
     }
     
