@@ -1,5 +1,5 @@
 import JSON
-import Service
+import Vapor
 import FluentMySQL
 
 protocol AddressRepository: ServiceType {
@@ -114,7 +114,15 @@ final class MySQLAddressRepository: AddressRepository {
                     conn.future() :
                     Street.query(on: transaction).filter(\.address == id).update(data: streetJSON)
                 
-                return address.and(street).transform(to: id).flatMap(self.find(address:)).flatMap { content in
+                let verifiedResult = address.and(street).catchMap { error in
+                    if let mysql = error as? MySQLError, mysql.identifier == "server (1054)" {
+                        let property = mysql.reason.split(separator: "'")[1]
+                        throw Abort(.badRequest, reason: "Attempted to set non-existant model property `\(property)`")
+                    }
+                    throw error
+                }
+                
+                return verifiedResult.transform(to: id).flatMap(self.find(address:)).flatMap { content in
                     guard let content = content else {
                         return transaction.future(nil)
                     }
