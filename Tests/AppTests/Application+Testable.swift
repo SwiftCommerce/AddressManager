@@ -2,10 +2,14 @@ import Vapor
 @testable import App
 
 extension Application {
-    static func testable(env: Environment = .testing)throws -> Application {
-        var services = Services.default()
+    static func testable(
+        env: Environment = .testing,
+        config: Config = Config.default(),
+        services: Services = Services.default()
+    )throws -> Application {
+        var services = services
         var environment = env
-        var configuration = Config.default()
+        var configuration = config
         
         try configure(&configuration, &environment, &services)
         let app = try Application(config: configuration, environment: environment, services: services)
