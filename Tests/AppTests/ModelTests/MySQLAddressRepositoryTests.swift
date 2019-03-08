@@ -6,10 +6,12 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
     
     var addressID: Address.ID? = nil
     var app: Application! = nil
+    
     var pool: MySQLAddressRepository.ConnectionPool! = nil
+    var validator: AddressValidator? = nil
     
     var addresses: MySQLAddressRepository {
-        return MySQLAddressRepository(pool: self.pool)
+        return MySQLAddressRepository(pool: self.pool, validator: self.validator)
     }
     
     public override func setUp() {
@@ -17,6 +19,7 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
         
         self.app = try! Application.testable()
         self.pool = try! self.app.connectionPool(to: .mysql)
+        self.validator = try? self.app.make(AddressValidator.self)
     }
     
     public override func tearDown() {
