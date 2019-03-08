@@ -24,6 +24,10 @@ extension Application {
         
         return try responder.respond(to: request).wait()
     }
+    
+    func response<D>(for http: HTTPRequest, as decodable: D)throws -> D where D: Decodable {
+        return try self.response(for: http).content.decode(D.self).wait()
+    }
 }
 
 func caseStart(_ file: String = #file, _ function: String = #function) {
