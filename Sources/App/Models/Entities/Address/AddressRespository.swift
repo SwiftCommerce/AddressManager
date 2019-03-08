@@ -5,7 +5,7 @@ import FluentMySQL
 protocol AddressRepository: ServiceType {
     func create(address: AddressContent) -> EventLoopFuture<AddressContent>
     func find(address id: Address.ID) -> EventLoopFuture<AddressContent?>
-    func update(address id: Address.ID, with content: AddressContent) -> EventLoopFuture<AddressContent?>
+    func update(address id: Address.ID, with content: JSON) -> EventLoopFuture<AddressContent?>
     func delete(address id: Address.ID) -> EventLoopFuture<Void>
 }
 
@@ -103,20 +103,16 @@ final class MySQLAddressRepository: AddressRepository {
         }
     }
     
-    func update(address id: Address.ID, with content: AddressContent) -> EventLoopFuture<AddressContent?> {
+    func update(address id: Address.ID, with content: JSON) -> EventLoopFuture<AddressContent?> {
         return self.pool.withConnection { conn -> EventLoopFuture<AddressContent?> in
             return conn.transaction(on: .mysql) { transaction in
+                let address = Address.query(on: transaction).filter(\.id == id).update(data: content)
                 
-                let addressJSON = try JSONCoder.encode(content)
-                let address = Address.query(on: transaction).filter(\.id == id).update(data: addressJSON)
-                
-                let streetJSON = try addressJSON.element(at: ["street"])
-                let street: Future<Void>
-                if streetJSON == .null {
-                    street = conn.future()
-                } else {
-                    street = Street.query(on: transaction).filter(\.address == id).update(data: streetJSON)
-                }
+                let streetJSON = try content.element(at: ["street"])
+                let street =
+                    streetJSON == .null ?
+                    conn.future() :
+                    Street.query(on: transaction).filter(\.address == id).update(data: streetJSON)
                 
                 return address.and(street).transform(to: id).flatMap(self.find(address:)).flatMap { content in
                     guard let content = content else {

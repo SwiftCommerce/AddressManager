@@ -1,5 +1,6 @@
 import Vapor
-import FluentMySQL
+import Fluent
+import JSONKit
 
 final class AddressController: RouteCollection {
     let repository: AddressRepository
@@ -15,7 +16,7 @@ final class AddressController: RouteCollection {
         
         addresses.post(AddressContent.self, use: create)
         addresses.get(Address.parameter, use: read)
-        addresses.patch(AddressContent.self, at: Address.parameter, use: update)
+        addresses.patch(JSON.self, at: Address.parameter, use: update)
         addresses.delete(Address.parameter, use: delete)
     }
     
@@ -27,7 +28,7 @@ final class AddressController: RouteCollection {
         return try self.repository.find(address: request.addressID()).unwrap(or: Abort(.notFound))
     }
     
-    func update(_ request: Request, content: AddressContent)throws -> Future<AddressContent> {
+    func update(_ request: Request, content: JSON)throws -> Future<AddressContent> {
         return try self.repository.update(address: request.addressID(), with: content).unwrap(or: Abort(.notFound))
     }
     

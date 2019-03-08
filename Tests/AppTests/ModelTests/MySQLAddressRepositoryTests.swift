@@ -1,4 +1,5 @@
 @testable import App
+import JSON
 import Vapor
 import XCTest
 
@@ -100,19 +101,7 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
             throw Abort(.internalServerError)
         }
         
-        let update = AddressContent(
-            id: nil,
-            buildingName: "Apple Campus",
-            typeIdentifier: nil,
-            type: nil,
-            municipality: nil,
-            city: nil,
-            district: nil,
-            postalArea: nil,
-            country: nil,
-            street: nil
-        )
-        
+        let update = JSON.object(["buildingName": .string("Apple Campus")])
         guard let address = try self.addresses.update(address: id, with: update).wait() else {
             XCTFail("Did not find `Address` model with ID `\(id)`")
             return
@@ -129,6 +118,15 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
         
         XCTAssertEqual(address.street?.name, "Infinite")
         XCTAssertEqual(address.street?.type, "Loop")
+        
+        
+        let revert = JSON.object(["buildingName": .null])
+        guard let revertedAddress = try self.addresses.update(address: id, with: revert).wait() else {
+            XCTFail("Did not find `Address` model with ID `\(id)`")
+            return
+        }
+        
+        XCTAssertNil(revertedAddress.buildingName)
     }
     
     func delete()throws {
