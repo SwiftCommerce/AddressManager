@@ -12,9 +12,9 @@ extension MySQLDatabase {
         
         static func parse(_ level: String) -> IsolationLevel? {
             switch level {
-            case "REPEATABLE-READ": return .repeatable
-            case "READ-COMMITTED": return .committed
-            case "READ-UNCOMMITTED": return .uncommitted
+            case "REPEATABLE-READ", "REPEATABLE READ": return .repeatable
+            case "READ-COMMITTED", "READ COMMITTED": return .committed
+            case "READ-UNCOMMITTED", "READ UNCOMMITTED": return .uncommitted
             case "SERIALIZABLE": return .serializable
             default: return nil
             }
