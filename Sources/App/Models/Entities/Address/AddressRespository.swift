@@ -106,7 +106,11 @@ final class MySQLAddressRepository: AddressRepository {
     func update(address id: Address.ID, with content: JSON) -> EventLoopFuture<AddressContent?> {
         return self.pool.withConnection { conn -> EventLoopFuture<AddressContent?> in
             return conn.transaction(on: .mysql) { transaction in
-                let address = Address.query(on: transaction).filter(\.id == id).update(data: content)
+                guard case var .object(addressJSON) = content else {
+                    throw Abort(.badRequest, reason: "JSON body must be an object")
+                }
+                addressJSON["street"] = nil
+                let address = Address.query(on: transaction).filter(\.id == id).update(data: JSON.object(addressJSON))
                 
                 let streetJSON = try content.element(at: ["street"])
                 let street =
