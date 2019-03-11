@@ -1,0 +1,65 @@
+@testable import App
+import XCTest
+import Vapor
+import MySQL
+
+final class MySQLDatabaseIsolationLevelTests: XCTestCase {
+    typealias IsolationLevel = MySQLDatabase.IsolationLevel
+    
+    func testCases() {
+        XCTAssertEqual(IsolationLevel.repeatable.rawValue, "REPEATABLE READ")
+        XCTAssertEqual(IsolationLevel.committed.rawValue, "READ COMMITTED")
+        XCTAssertEqual(IsolationLevel.uncommitted.rawValue, "READ UNCOMMITTED")
+        XCTAssertEqual(IsolationLevel.serializable.rawValue, "SERIALIZABLE")
+        XCTAssertEqual(IsolationLevel.default, .repeatable)
+    }
+    
+    func testQuery() {
+        XCTAssertEqual(
+            IsolationLevel.repeatable.query,
+            "SET GLOBAL TRANSACTION ISOLATION LEVEL REPEATABLE READ"
+        )
+        XCTAssertEqual(
+            IsolationLevel.committed.query,
+            "SET GLOBAL TRANSACTION ISOLATION LEVEL READ COMMITTED"
+        )
+        XCTAssertEqual(
+            IsolationLevel.uncommitted.query,
+            "SET GLOBAL TRANSACTION ISOLATION LEVEL READ UNCOMMITTED"
+        )
+        XCTAssertEqual(
+            IsolationLevel.serializable.query,
+            "SET GLOBAL TRANSACTION ISOLATION LEVEL SERIALIZABLE"
+        )
+    }
+    
+    func testParse() {
+        XCTAssertEqual(IsolationLevel.parse("REPEATABLE-READ"), .repeatable)
+        XCTAssertEqual(IsolationLevel.parse("REPEATABLE READ"), .repeatable)
+        XCTAssertEqual(IsolationLevel.parse("READ-COMMITTED"), .committed)
+        XCTAssertEqual(IsolationLevel.parse("READ COMMITTED"), .committed)
+        XCTAssertEqual(IsolationLevel.parse("READ-UNCOMMITTED"), .uncommitted)
+        XCTAssertEqual(IsolationLevel.parse("READ UNCOMMITTED"), .uncommitted)
+        XCTAssertEqual(IsolationLevel.parse("SERIALIZABLE"), .serializable)
+        
+        XCTAssertNil(IsolationLevel.parse("REPEATABLE"))
+        XCTAssertNil(IsolationLevel.parse("COMMITTED"))
+        XCTAssertNil(IsolationLevel.parse("UNCOMMITTED"))
+    }
+    
+    func testCurrent()throws {
+        let app = try Application.testable()
+        let pool = try app.connectionPool(to: .mysql)
+        let connection = try pool.requestConnection().wait()
+        defer { pool.releaseConnection(connection) }
+        
+        try XCTAssertNoThrow(IsolationLevel.current(from: connection).wait())
+    }
+    
+    static let allTests = [
+        ("testCases", testCases),
+        ("testQuery", testQuery),
+        ("testParse", testParse),
+        ("testCurrent", testCurrent)
+    ]
+}

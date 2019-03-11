@@ -2,7 +2,8 @@
 import XCTest
 
 XCTMain([
-    testCase(MySQLAddressRepositoryTests.allTests)
+    testCase(MySQLAddressRepositoryTests.allTests),
+    testCase(MySQLDatabaseIsolationLevelTests.allTests)
 ])
 
 #endif
