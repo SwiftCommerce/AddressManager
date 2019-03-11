@@ -43,7 +43,7 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
         
         let content = AddressContent(
             id: nil,
-            buildingName: nil,
+            buildingName: "Apple Campus",
             typeIdentifier: nil,
             type: nil,
             municipality: nil,
@@ -51,14 +51,7 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
             district: "California",
             postalArea: "95014",
             country: "United States",
-            street: StreetContent(
-                id: nil,
-                number: nil,
-                numberSuffix: nil,
-                name: "Infinite",
-                type: "Loop",
-                direction: nil
-            )
+            street: nil
         )
         
         let created = try self.addresses.create(address: content).wait()
@@ -84,13 +77,11 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
         XCTAssertEqual(address.id, id)
         XCTAssertNotNil(address.street?.id)
         
+        XCTAssertEqual(address.buildingName, "Apple Campus")
         XCTAssertEqual(address.city, "Cupertino")
         XCTAssertEqual(address.district, "California")
         XCTAssertEqual(address.postalArea, "95014")
         XCTAssertEqual(address.country, "United States")
-        
-        XCTAssertEqual(address.street?.name, "Infinite")
-        XCTAssertEqual(address.street?.type, "Loop")
     }
     
     func update()throws {
@@ -101,7 +92,13 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
             throw Abort(.internalServerError)
         }
         
-        let update = JSON.object(["buildingName": .string("Apple Campus")])
+        let update = JSON.object([
+            "country": .string("United States"),
+            "street": .object([
+                "name": "Infinite",
+                "type": "Loop"
+            ])
+        ])
         guard let address = try self.addresses.update(address: id, with: update).wait() else {
             XCTFail("Did not find `Address` model with ID `\(id)`")
             return
@@ -120,13 +117,13 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
         XCTAssertEqual(address.street?.type, "Loop")
         
         
-        let revert = JSON.object(["buildingName": .null])
+        let revert = JSON.object(["country": .null])
         guard let revertedAddress = try self.addresses.update(address: id, with: revert).wait() else {
             XCTFail("Did not find `Address` model with ID `\(id)`")
             return
         }
         
-        XCTAssertNil(revertedAddress.buildingName)
+        XCTAssertNil(revertedAddress.country)
     }
     
     func delete()throws {
