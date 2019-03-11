@@ -64,7 +64,16 @@ final class MySQLAddressRepository: AddressRepository {
                 }
             }.map { saved in
                 var response = content
+                
                 response.id = saved.0.id
+                response.street = response.street ?? StreetContent(
+                    id: nil,
+                    number: nil,
+                    numberSuffix: nil,
+                    name: nil,
+                    type: nil,
+                    direction: nil
+                )
                 response.street?.id = saved.1.id
                 
                 return response
