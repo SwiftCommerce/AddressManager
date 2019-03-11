@@ -31,28 +31,41 @@ final class GoogleMapsAddressValiadtor: AddressValidator {
         self.key = key
     }
     
-    private func urlCode(for content: AddressContent) -> String {
-        let street: String?
-        if let st = content.street {
-            street = [st.number.map(String.init), st.numberSuffix, st.name, st.type, st.direction?.rawValue]
-                .compactMap { $0 }
-                .joined(separator: "+")
-        } else {
-            street = nil
+    private func urlCode(for content: AddressContent)throws -> String {
+        let street = [
+            content.street?.number.map(String.init),
+            content.buildingName,
+            content.street?.numberSuffix,
+            content.street?.name,
+            content.street?.type,
+            content.street?.direction?.rawValue
+        ].compactMap { $0 }.joined(separator: "+")
+        
+        let query = [
+            street,
+            content.type,
+            content.typeIdentifier,
+            content.municipality,
+            content.city,
+            content.district,
+            content.postalArea,
+            content.country
+        ].compactMap { $0 }.joined(separator: "+")
+        
+        guard let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+            throw Abort(.badRequest, reason: "Could not percent-encode URL query string: `\(query)`")
         }
         
-        return
-            [street, content.type, content.typeIdentifier, content.municipality, content.city, content.district, content.postalArea, content.country]
-                .compactMap { $0 }
-                .joined(separator: "+")
-        
+        return encoded
     }
     
     func validate(address: AddressContent) -> EventLoopFuture<Void> {
-        let url =
-            "https://maps.googleapis.com/maps/api/geocode/json" +
-            "?address=\(self.urlCode(for: address))" +
-            "&key=\(self.key)"
+        let url: String
+        do {
+            url = try "https://maps.googleapis.com/maps/api/geocode/json?address=\(self.urlCode(for: address))&key=\(self.key)"
+        } catch let error {
+            return self.client.container.future(error: error)
+        }
         
         return self.client.get(url).map { response in
             
