@@ -56,10 +56,34 @@ final class MySQLDatabaseIsolationLevelTests: XCTestCase {
         try XCTAssertNoThrow(IsolationLevel.current(from: connection).wait())
     }
     
+    func testIsolatedTransaction()throws {
+        let app = try Application.testable()
+        let pool = try app.connectionPool(to: .mysql)
+        let connection = try pool.requestConnection().wait()
+        defer { pool.releaseConnection(connection) }
+        
+        let level = try IsolationLevel.current(from: connection).wait()
+        let transactionLevel: IsolationLevel
+        switch level {
+        case .repeatable: transactionLevel = .committed
+        case .committed: transactionLevel = .uncommitted
+        case .uncommitted: transactionLevel = .serializable
+        case .serializable: transactionLevel = .repeatable
+        }
+        
+        let usedLevel = try connection.transaction(on: .mysql, level: transactionLevel) { transaction in
+            return IsolationLevel.current(from: transaction)
+        }.wait()
+        
+        XCTAssertEqual(usedLevel, transactionLevel)
+        try XCTAssertEqual(IsolationLevel.current(from: connection).wait(), level)
+    }
+    
     static let allTests = [
         ("testCases", testCases),
         ("testQuery", testQuery),
         ("testParse", testParse),
-        ("testCurrent", testCurrent)
+        ("testCurrent", testCurrent),
+        ("testIsolatedTransaction", testIsolatedTransaction)
     ]
 }
