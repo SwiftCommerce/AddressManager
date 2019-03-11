@@ -114,7 +114,7 @@ final class MySQLAddressRepository: AddressRepository {
     
     func update(address id: Address.ID, with content: JSON) -> EventLoopFuture<AddressContent?> {
         return self.pool.withConnection { conn -> EventLoopFuture<AddressContent?> in
-            return conn.transaction(on: .mysql) { transaction in
+            return conn.transaction(on: .mysql, level: .uncommitted) { transaction in
                 guard case var .object(addressJSON) = content else {
                     throw Abort(.badRequest, reason: "JSON body must be an object")
                 }
