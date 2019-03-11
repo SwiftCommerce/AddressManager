@@ -1,4 +1,5 @@
-import Service
+import Vapor
+import JSON
 
 // MARK: - Protocol
 
@@ -14,18 +15,104 @@ extension AddressValidator {
 
 // MARK: - Implementation
 
-final class EmptyAddressValidator: AddressValidator {
-    static func makeService(for container: Container) throws -> EmptyAddressValidator {
-        return EmptyAddressValidator(worker: container)
+final class GoogleMapsAddressValiadtor: AddressValidator {
+    static func makeService(for container: Container) throws -> GoogleMapsAddressValiadtor {
+        guard let key = Environment.get("GOOGLE_MAPS_API_KEY") else {
+            throw Abort(.internalServerError, reason: "Missing `GOOGLE_MAPS_API_KEY` environment variable")
+        }
+        return try GoogleMapsAddressValiadtor(client: container.make(), key: key)
     }
     
-    let worker: Worker
+    let client: Client
+    let key: String
     
-    init(worker: Worker) {
-        self.worker = worker
+    init(client: Client, key: String) {
+        self.client = client
+        self.key = key
+    }
+    
+    private func urlCode(for content: AddressContent) -> String {
+        let street: String?
+        if let st = content.street {
+            street = [st.number.map(String.init), st.numberSuffix, st.name, st.type, st.direction?.rawValue]
+                .compactMap { $0 }
+                .joined(separator: "+")
+        } else {
+            street = nil
+        }
+        
+        return
+            [street, content.type, content.typeIdentifier, content.municipality, content.city, content.district, content.postalArea, content.country]
+                .compactMap { $0 }
+                .joined(separator: "+")
+        
     }
     
     func validate(address: AddressContent) -> EventLoopFuture<Void> {
-        return self.worker.future()
+        let url =
+            "https://maps.googleapis.com/maps/api/geocode/json" +
+            "?address=\(self.urlCode(for: address))" +
+            "&key=\(self.key)"
+        
+        return self.client.get(url).map { response in
+            
+            // The error that will be thrown if validation fails.
+            // We wrap it in a closure so it only gets initialized if we need it.
+            let error = {
+                return Abort(
+                    .badRequest,
+                    reason: "Unable to validate given address information",
+                    identifier: "VALIDATION_FAILED"
+                )
+            }
+            
+            // Assert we got a valid response back.
+            guard
+                response.http.status == .ok,
+                let data = response.http.body.data
+            else {
+                throw error()
+            }
+            let json = try JSONDecoder().decode(JSON.self, from: data)
+            
+            // Assert the geocoding resulted in actual locations
+            guard case let .string(status)? = json["status"], status == "OK" else {
+                throw error()
+            }
+            
+            // Assert the address was percise and correct enough that:
+            // 1. There is only one possible location it could be.
+            // 2. The location is precise and not a generic region.
+            guard
+                case let .array(results)? = json["results"],
+                results.count == 1,
+                case let .object(geo)? = results.first?["geometry"],
+                case let .string(locationType)? = geo["location_type"],
+                LocationType(rawValue: locationType) != .approximate
+            else {
+                throw error()
+            }
+            
+            // Validation succeeded. Return `Void` for success.
+            return ()
+        }
+    }
+}
+
+extension GoogleMapsAddressValiadtor {
+    enum LocationType: String {
+        case rooftop = "ROOFTOP"
+        case interpolation = "RANGE_INTERPOLATED"
+        case geomatricCenter = "GEOMETRIC_CENTER"
+        case approximate = "APPROXIMATE"
+        
+        var acurracy: Int {
+            switch self {
+            case .rooftop: return 0
+            case .interpolation: return 1
+            case .geomatricCenter: return 2
+            case .approximate: return 3
+            }
+        }
     }
 }
