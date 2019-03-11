@@ -8,7 +8,7 @@ extension MySQLDatabase {
         case serializable = "SERIALIZABLE"
         
         static let `default`: IsolationLevel = .repeatable
-        static let sessionColumn: String = "@@session.transaction_isolation"
+        static let sessionColumn: String = "@@global.transaction_isolation"
         
         static func parse(_ level: String) -> IsolationLevel? {
             switch level {
