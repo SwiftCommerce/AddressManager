@@ -25,7 +25,7 @@ extension Application {
         return try responder.respond(to: request).wait()
     }
     
-    func response<D>(for http: HTTPRequest, as decodable: D)throws -> D where D: Decodable {
+    func response<D>(for http: HTTPRequest, as decodable: D.Type = D.self)throws -> D where D: Decodable {
         return try self.response(for: http).content.decode(D.self).wait()
     }
 }
