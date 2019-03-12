@@ -419,6 +419,53 @@
 					"body": null
 				}
 			]
+		},
+		{
+			"name": "Validate Address",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d4d6ab29-8b80-4229-8f21-eea09eb94d01",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"buildingName\": \"Apple Campus\",\n\t\"city\": \"Cupertino\",\n\t\"district\": \"California\",\n\t\"postalArea\": \"95014\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/addresses/validate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"addresses",
+						"validate"
+					]
+				},
+				"description": "Validates the address data without sotring it. A successfull validation will return a 200 (OK) response without a body."
+			},
+			"response": []
 		}
 	],
 	"event": [
