@@ -465,7 +465,58 @@
 				},
 				"description": "Validates the address data without sotring it. A successfull validation will return a 200 (OK) response without a body."
 			},
-			"response": []
+			"response": [
+				{
+					"name": "Validate Address",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"buildingName\": \"Apple Campus\",\n\t\"city\": \"Cupertino\",\n\t\"district\": \"California\",\n\t\"postalArea\": \"95014\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8084/v1/addresses/validate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8084",
+							"path": [
+								"v1",
+								"addresses",
+								"validate"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "content-length",
+							"value": "0"
+						},
+						{
+							"key": "date",
+							"value": "Tue, 12 Mar 2019 20:55:20 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
 		}
 	],
 	"event": [
