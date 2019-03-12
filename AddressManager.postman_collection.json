@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "49db3543-d5fb-4247-84d7-ed1d0ff25997",
 		"name": "Address Manager",
-		"description": "Address Manager is a micro-service that stores international address information.",
+		"description": "Address Manager is a micro-service that stores and validates international address information.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -56,7 +56,7 @@
 						""
 					]
 				},
-				"description": "Creates a new `Address` model."
+				"description": "Creates a new `Address` model.\n\nThe body of the request will be validated before it is saved to the database. If validation fails, a 400 (Bad Request) response will be returned and the model will not be saved."
 			},
 			"response": [
 				{
@@ -281,7 +281,7 @@
 						"{{address}}"
 					]
 				},
-				"description": "Updates the properties of an `Address` model."
+				"description": "Updates the properties of an `Address` model.\n\nThe request body passed in acts as the data for updating the model. If a property has a value, the saved model's column will be updated to that value. This means that if you pass in `null`, the property will be set to that value. Properties that are not defined will be ignored.\n\nWhen the model is updated, the new data will be validated. If validation fails, the update will not be saved."
 			},
 			"response": [
 				{
@@ -419,6 +419,28 @@
 					"body": null
 				}
 			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "676cbcfc-c5d9-4011-8d48-078d75582fa5",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "0914da2e-dab5-4875-88f0-b0a44a2d07a3",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }
