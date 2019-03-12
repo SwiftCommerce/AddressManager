@@ -4,7 +4,7 @@ Address Manager is a micro-service built with [Vapor](https://vapor.codes/), a s
 
 ## Setup
 
-Start by forking and cloning the Address Manager repository. There are a few pre-requisets you will need before you can run it.
+Start by forking and cloning the Address Manager repository. There are a few prerequisites you will need before you can run it.
 
 #### MySQL
 
