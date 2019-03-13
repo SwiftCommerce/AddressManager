@@ -14,11 +14,12 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     }
     
     // Register middleware
-    var middlewares = MiddlewareConfig() // Create _empty_ middleware config
-    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
+    var middlewares = MiddlewareConfig()
+    middlewares.use(CORSMiddleware.self)
+    middlewares.use(ErrorMiddleware.self)
     services.register(middlewares)
 
-    // Register the configured SQLite database to the database config.
+    // Register the configured databases to the database config.
     var databasesConfig = DatabasesConfig()
     try databases(config: &databasesConfig, env: env)
     services.register(databasesConfig)
