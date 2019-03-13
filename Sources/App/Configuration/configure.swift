@@ -15,7 +15,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     
     // Register middleware
     var middlewares = MiddlewareConfig()
-    middlewares.use(CORSMiddleware.self)
+    middlewares.use(CORSMiddleware())
     middlewares.use(ErrorMiddleware.self)
     services.register(middlewares)
 
