@@ -101,11 +101,4 @@ final class GoogleMapsAddressValidatorTests: XCTestCase {
         
         try XCTAssertThrowsError(self.validator.validate(address: address).wait())
     }
-    
-    static let allTests = [
-        ("testBuildingAddress", testBuildingAddress),
-        ("testStreetAddress", testStreetAddress),
-        ("testState", testState),
-        ("testNonExistant", testNonExistant)
-    ]
 }

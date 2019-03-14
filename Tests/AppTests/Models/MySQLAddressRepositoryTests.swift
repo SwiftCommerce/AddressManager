@@ -136,8 +136,4 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
         
         try XCTAssertNoThrow(self.addresses.delete(address: id).wait())
     }
-    
-    public static let allTests = [
-        ("testOperations", testOperations)
-    ]
 }

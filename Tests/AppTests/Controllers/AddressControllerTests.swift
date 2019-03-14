@@ -206,8 +206,4 @@ final class AddressControllerTests: XCTestCase {
         
         return request
     }
-    
-    static let allTests = [
-        ("testEndpoints", testEndpoints)
-    ]
 }

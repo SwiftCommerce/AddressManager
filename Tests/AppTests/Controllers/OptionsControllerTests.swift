@@ -38,10 +38,6 @@ final class OptionsControllerTests: XCTestCase {
     func handler(_ request: Request) -> Response {
         return request.response()
     }
-    
-    static let allTests = [
-        ("testRouteGeneration", testRouteGeneration)
-    ]
 }
 
 struct Param: Parameter {

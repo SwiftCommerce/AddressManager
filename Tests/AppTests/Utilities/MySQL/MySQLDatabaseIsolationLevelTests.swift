@@ -78,12 +78,4 @@ final class MySQLDatabaseIsolationLevelTests: XCTestCase {
         XCTAssertEqual(usedLevel, transactionLevel)
         try XCTAssertEqual(IsolationLevel.current(from: connection).wait(), level)
     }
-    
-    static let allTests = [
-        ("testCases", testCases),
-        ("testQuery", testQuery),
-        ("testParse", testParse),
-        ("testCurrent", testCurrent),
-        ("testIsolatedTransaction", testIsolatedTransaction)
-    ]
 }
