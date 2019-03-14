@@ -8,6 +8,4 @@ public func routes(_ router: Router, _ container: Container) throws {
     
     let addresses = try AddressController(repository: container.make(), validator: container.make())
     try router.register(collection: addresses)
-    
-    try router.register(collection: OptionsController())
 }
