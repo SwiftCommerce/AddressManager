@@ -3,7 +3,7 @@ import FluentMySQL
 func databases(config: inout DatabasesConfig, env: Environment)throws {
     let mysqlConfig = MySQLDatabaseConfig(
         hostname: Environment.get("DATABASE_HOSTNAME") ?? "localhost",
-        port: Int(Environment.get("DATABASE_POST") ?? "3306") ?? 3306,
+        port: Int(Environment.get("DATABASE_PORT") ?? "3306") ?? 3306,
         username: Environment.get("DATABASE_USER") ?? "root",
         password: Environment.get("DATABASE_PASSWORD") ?? "password",
         database: Environment.get("DATABASE_DB") ?? "address_manager",
