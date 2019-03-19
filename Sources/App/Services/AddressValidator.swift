@@ -42,7 +42,10 @@ final class SmartyStreetAddressValidator: AddressValidator {
     }
     
     func validate(address: AddressContent) -> EventLoopFuture<Void> {
-        if ["united states", "us", "usa", "united states of america"].contains(address.country?.lowercased()) {
+        if
+            ["united states", "us", "usa", "united states of america"].contains(address.country?.lowercased()) ||
+            address.country == nil
+        {
             return self.unitedStates(address: address)
         } else {
             guard self.supportInternational else {
