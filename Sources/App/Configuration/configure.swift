@@ -33,5 +33,5 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     setupRepositories(services: &services, config: &config)
     
     // Regiaster the address validation service used by the `AddressController`.
-    services.register(AddressValidator.self, factory: GoogleMapsAddressValiadtor.makeService)
+    services.register(AddressValidator.self, factory: SmartyStreetAddressValidator.makeService)
 }
