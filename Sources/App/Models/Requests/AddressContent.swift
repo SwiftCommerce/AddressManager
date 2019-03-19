@@ -12,7 +12,7 @@ struct AddressContent: Content {
     var country: String?
     var street: StreetContent?
     
-    func urlEncoded(separator: String = "+")throws -> String {
+    func encodedString(separator: String = "+")throws -> String {
         let street = [
             self.street?.number.map(String.init),
             self.buildingName,
@@ -22,8 +22,15 @@ struct AddressContent: Content {
             self.street?.direction?.rawValue
         ].compactMap { $0 }.joined(separator: separator)
         
+        guard let encoded = street.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+            throw Abort(.badRequest, reason: "Could not percent-encode URL query string: `\(street)`")
+        }
+        
+        return encoded
+    }
+    
+    func urlEncoded(separator: String = "+")throws -> String {
         let query = [
-            street,
             self.type,
             self.typeIdentifier,
             self.municipality,
@@ -37,6 +44,6 @@ struct AddressContent: Content {
             throw Abort(.badRequest, reason: "Could not percent-encode URL query string: `\(query)`")
         }
         
-        return encoded
+        return try self.encodedString(separator: separator) + separator + encoded
     }
 }
