@@ -72,7 +72,7 @@ final class SmartyStreetAddressValidator: AddressValidator {
                 return address == "" ? nil : address
             }
             let parameters: [String: String?] = try [
-                "address1": address.encodedString(),
+                "street": address.encodedStreet(separator: " "),
                 "secondary": address2(),
                 "city": address.district,
                 "state": address.district,
