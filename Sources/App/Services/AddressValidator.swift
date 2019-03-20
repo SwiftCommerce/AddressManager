@@ -77,6 +77,7 @@ final class SmartyStreetAddressValidator: AddressValidator {
                 "city": address.city,
                 "state": address.district,
                 "zipcode": address.postalArea,
+                "canidates": "1",
                 "match": "strict"
             ]
             query = parameters.reduce(into: []) { query, parameter in
