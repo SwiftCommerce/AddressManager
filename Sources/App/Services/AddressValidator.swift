@@ -80,16 +80,16 @@ final class SmartyStreetAddressValidator: AddressValidator {
                 "canidates": "1",
                 "match": "strict"
             ]
-            query = parameters.reduce(into: []) { query, parameter in
+            query = parameters.reduce(into: "") { query, parameter in
                 if let value = parameter.value {
-                    query.append("\(parameter.key)=\(value)")
+                    query.append("&\(parameter.key)=\(value)")
                 }
-            }.joined(separator: "&")
+            }
         } catch let error {
             return self.client.container.future(error: error)
         }
         
-        return self.client.get(self.unitedStatesAPI + (query == "" ? "" : "?" + query)).map { response in
+        return self.client.get(self.unitedStatesAPI + query) .map { response in
             let status = response.http.status
             guard status == .ok else {
                 let message: String
@@ -113,7 +113,7 @@ final class SmartyStreetAddressValidator: AddressValidator {
                         "avoid this error by adding your IP address as an authorized host for the website key in question."
                 default: message = "Got unexpected status code `\(status)` from SmartyStreet API"
                 }
-                throw Abort(.failedDependency, reason: "\(status): \(message)")
+                throw Abort(.failedDependency, reason: "(API \(status)) \(message)")
             }
             
             /// Verify the response wasn't an empty array.
@@ -146,7 +146,7 @@ final class SmartyStreetAddressValidator: AddressValidator {
                 return locality == "" ? nil : locality
             }
             let parameters: [String: String?] = try [
-                "address1": address.encodedString(),
+                "address1": address.encodedStreet(separator: " "),
                 "address2": address2(),
                 "country": address.country,
                 "locality": locality(),
@@ -162,7 +162,7 @@ final class SmartyStreetAddressValidator: AddressValidator {
             return self.client.container.future(error: error)
         }
         
-        return self.client.get(self.internationalAPI + (query == "" ? "" : "?" + query)).map { response in
+        return self.client.get(self.internationalAPI + query).map { response in
             
             // Make sure we get a valid response back from SmartyStreet.
             let status = response.http.status
@@ -197,7 +197,7 @@ final class SmartyStreetAddressValidator: AddressValidator {
                     message = "Got unexpected status code `\(status)` from SmartyStreet API"
                 }
                 
-                throw Abort(.failedDependency, reason: "\(status): \(message)")
+                throw Abort(.failedDependency, reason: "(API \(status)) \(message)")
             }
             
             // Verify the response wasn't an empty array.
