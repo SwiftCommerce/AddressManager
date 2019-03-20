@@ -43,15 +43,22 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
         
         let content = AddressContent(
             id: nil,
-            buildingName: "Apple Campus",
+            buildingName: nil,
             typeIdentifier: nil,
             type: nil,
             municipality: nil,
             city: "Cupertino",
             district: "California",
             postalArea: "95014",
-            country: "United States",
-            street: nil
+            country: nil,
+            street: StreetContent(
+                id: nil,
+                number: 1,
+                numberSuffix: nil,
+                name: "Apple Park",
+                type: "Way",
+                direction: nil
+            )
         )
         
         let created = try self.addresses.create(address: content).wait()
@@ -77,11 +84,14 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
         XCTAssertEqual(address.id, id)
         XCTAssertNotNil(address.street?.id)
         
-        XCTAssertEqual(address.buildingName, "Apple Campus")
+        XCTAssertNil(address.country)
         XCTAssertEqual(address.city, "Cupertino")
         XCTAssertEqual(address.district, "California")
         XCTAssertEqual(address.postalArea, "95014")
-        XCTAssertEqual(address.country, "United States")
+        
+        XCTAssertEqual(address.street?.type, "Way")
+        XCTAssertEqual(address.street?.name, "Apple Park")
+        XCTAssertEqual(address.street?.number, 1)
     }
     
     func update()throws {
@@ -93,11 +103,7 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
         }
         
         let update = JSON.object([
-            "country": .string("United States"),
-            "street": .object([
-                "name": "Infinite",
-                "type": "Loop"
-            ])
+            "country": .string("United States")
         ])
         guard let address = try self.addresses.update(address: id, with: update).wait() else {
             XCTFail("Did not find `Address` model with ID `\(id)`")
@@ -107,14 +113,14 @@ public final class MySQLAddressRepositoryTests: XCTestCase {
         XCTAssertEqual(address.id, id)
         XCTAssertNotNil(address.street?.id)
         
-        XCTAssertEqual(address.buildingName, "Apple Campus")
         XCTAssertEqual(address.city, "Cupertino")
         XCTAssertEqual(address.district, "California")
         XCTAssertEqual(address.postalArea, "95014")
         XCTAssertEqual(address.country, "United States")
         
-        XCTAssertEqual(address.street?.name, "Infinite")
-        XCTAssertEqual(address.street?.type, "Loop")
+        XCTAssertEqual(address.street?.type, "Way")
+        XCTAssertEqual(address.street?.name, "Apple Park")
+        XCTAssertEqual(address.street?.number, 1)
         
         
         let revert = JSON.object(["country": .null])

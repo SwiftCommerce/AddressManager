@@ -42,7 +42,7 @@ final class AddressControllerTests: XCTestCase {
         
         let body = try JSONEncoder().encode(AddressContent(
             id: nil,
-            buildingName: "Apple Campus",
+            buildingName: nil,
             typeIdentifier: nil,
             type: nil,
             municipality: nil,
@@ -50,7 +50,14 @@ final class AddressControllerTests: XCTestCase {
             district: "California",
             postalArea: "95014",
             country: nil,
-            street: nil
+            street: StreetContent(
+                id: nil,
+                number: 1,
+                numberSuffix: nil,
+                name: "Apple Park",
+                type: "Way",
+                direction: nil
+            )
         ))
         let http = self.request(.POST, body: body)
         
@@ -60,10 +67,13 @@ final class AddressControllerTests: XCTestCase {
         XCTAssertNotNil(address.id)
         XCTAssertNotNil(address.street?.id)
         
-        XCTAssertEqual(address.buildingName, "Apple Campus")
         XCTAssertEqual(address.city, "Cupertino")
         XCTAssertEqual(address.district, "California")
         XCTAssertEqual(address.postalArea, "95014")
+        
+        XCTAssertEqual(address.street?.type, "Way")
+        XCTAssertEqual(address.street?.name, "Apple Park")
+        XCTAssertEqual(address.street?.number, 1)
     }
     
     func read()throws {
@@ -77,14 +87,16 @@ final class AddressControllerTests: XCTestCase {
         XCTAssertNotNil(address.street?.id)
         
         XCTAssertNil(address.country)
-        XCTAssertNil(address.street?.name)
-        XCTAssertNil(address.street?.type)
+        XCTAssertNil(address.buildingName)
+        XCTAssertNil(address.street?.numberSuffix)
         
         XCTAssertEqual(address.id, self.id)
-        XCTAssertEqual(address.buildingName, "Apple Campus")
         XCTAssertEqual(address.city, "Cupertino")
         XCTAssertEqual(address.district, "California")
         XCTAssertEqual(address.postalArea, "95014")
+        XCTAssertEqual(address.street?.type, "Way")
+        XCTAssertEqual(address.street?.name, "Apple Park")
+        XCTAssertEqual(address.street?.number, 1)
     }
     
     func update()throws {
@@ -101,14 +113,7 @@ final class AddressControllerTests: XCTestCase {
             district: nil,
             postalArea: nil,
             country: "United States",
-            street: StreetContent(
-                id: nil,
-                number: nil,
-                numberSuffix: nil,
-                name: "Infinite",
-                type: "Loop",
-                direction: nil
-            )
+            street: nil
         ))
         let http = self.request(.PATCH, self.addressID, body: body)
         let address = try self.app.response(for: http, as: AddressContent.self)
@@ -116,14 +121,14 @@ final class AddressControllerTests: XCTestCase {
         XCTAssertNotNil(address.id)
         XCTAssertNotNil(address.street?.id)
         
-        XCTAssertEqual(address.buildingName, "Apple Campus")
         XCTAssertEqual(address.city, "Cupertino")
         XCTAssertEqual(address.district, "California")
         XCTAssertEqual(address.postalArea, "95014")
         XCTAssertEqual(address.country, "United States")
         
-        XCTAssertEqual(address.street?.name, "Infinite")
-        XCTAssertEqual(address.street?.type, "Loop")
+        XCTAssertEqual(address.street?.type, "Way")
+        XCTAssertEqual(address.street?.name, "Apple Park")
+        XCTAssertEqual(address.street?.number, 1)
     }
     
     func delete()throws {
@@ -142,7 +147,7 @@ final class AddressControllerTests: XCTestCase {
         
         let appleCampus = try JSONEncoder().encode(AddressContent(
             id: nil,
-            buildingName: "Apple Campus",
+            buildingName: nil,
             typeIdentifier: nil,
             type: nil,
             municipality: nil,
@@ -150,7 +155,14 @@ final class AddressControllerTests: XCTestCase {
             district: "California",
             postalArea: "95014",
             country: nil,
-            street: nil
+            street: StreetContent(
+                id: nil,
+                number: 1,
+                numberSuffix: nil,
+                name: "Apple Park",
+                type: "Way",
+                direction: nil
+            )
         ))
         let campusRequest = self.request(.POST, "validate", body: appleCampus)
         let campusStatus = try self.app.response(for: campusRequest).http.status
@@ -194,7 +206,7 @@ final class AddressControllerTests: XCTestCase {
         ))
         let kansasRequest = self.request(.POST, "validate", body: kansas)
         let kansasStatus = try self.app.response(for: kansasRequest).http.status
-        XCTAssertEqual(kansasStatus, .badRequest)
+        XCTAssertEqual(kansasStatus, .failedDependency)
     }
     
     // MARK: - Helpers
