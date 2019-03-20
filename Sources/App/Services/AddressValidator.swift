@@ -74,7 +74,7 @@ final class SmartyStreetAddressValidator: AddressValidator {
             let parameters: [String: String?] = try [
                 "street": address.encodedStreet(separator: " "),
                 "secondary": address2(),
-                "city": address.district,
+                "city": address.city,
                 "state": address.district,
                 "zipcode": address.postalArea,
                 "match": "strict"
