@@ -2,15 +2,15 @@
 import XCTest
 import Vapor
 
-final class GoogleMapsAddressValidatorTests: XCTestCase {
-    var validator: GoogleMapsAddressValiadtor!
+final class SmartyStreetAddressValidatorTests: XCTestCase {
+    var validator: SmartyStreetAddressValidator!
     var app: Application!
     
     override func setUp() {
         super.setUp()
         
         self.app = try! Application.testable()
-        self.validator = try! GoogleMapsAddressValiadtor.makeService(for: self.app)
+        self.validator = try! SmartyStreetAddressValidator.makeService(for: self.app)
     }
     
     override func tearDown() {
@@ -23,7 +23,7 @@ final class GoogleMapsAddressValidatorTests: XCTestCase {
     func testBuildingAddress()throws {
         let address = AddressContent(
             id: nil,
-            buildingName: "Apple Campus",
+            buildingName: nil,
             typeIdentifier: nil,
             type: nil,
             municipality: nil,
@@ -31,7 +31,14 @@ final class GoogleMapsAddressValidatorTests: XCTestCase {
             district: "California",
             postalArea: "95014",
             country: "United States",
-            street: nil
+            street: StreetContent(
+                id: nil,
+                number: 1,
+                numberSuffix: nil,
+                name: "Apple Park",
+                type: "Way",
+                direction: nil
+            )
         )
         
         try XCTAssertNoThrow(self.validator.validate(address: address).wait())
@@ -52,8 +59,8 @@ final class GoogleMapsAddressValidatorTests: XCTestCase {
                 id: nil,
                 number: nil,
                 numberSuffix: nil,
-                name: "Infinite",
-                type: "Loop",
+                name: "Apple Park",
+                type: "Way",
                 direction: nil
             )
         )
