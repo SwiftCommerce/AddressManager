@@ -124,11 +124,7 @@ final class SmartyStreetAddressValidator: AddressValidator {
             }
             
             // Make sure the verification status of the response is `Verified`.
-            guard
-                case let .array(address) = try JSON(data: data),
-                case let .object(analysis)? = try address.first?.element(at: ["analysis"]),
-                analysis["dpv_match_code"] == .string("Y")
-            else {
+            guard try JSON(data: data).0.analysis.dpv_match_code == "Y" else {
                 throw Abort(.badRequest, reason: "Unable to validate given address")
             }
         }
@@ -208,11 +204,7 @@ final class SmartyStreetAddressValidator: AddressValidator {
             }
             
             // Make sure the verification status of the response is `Verified`.
-            guard
-                case let .array(address) = try JSON(data: data),
-                case let .object(analysis)? = try address.first?.element(at: ["analysis"]),
-                analysis["verification_status"] == .string("Verified")
-            else {
+            guard try JSON(data: data).0.analysis.verification_status == "Verified" else {
                 throw Abort(.badRequest, reason: "Unable to validate given address")
             }
         }
