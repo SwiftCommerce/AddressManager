@@ -5,10 +5,12 @@ import JSONKit
 final class AddressController: RouteCollection {
     let repository: AddressRepository
     let validator: AddressValidator
+    let parser: AddressParser
     
-    init(repository: AddressRepository, validator: AddressValidator) {
+    init(repository: AddressRepository, validator: AddressValidator, parser: AddressParser) {
         self.repository = repository
         self.validator = validator
+        self.parser = parser
     }
     
     func boot(router: Router) throws {
@@ -22,6 +24,7 @@ final class AddressController: RouteCollection {
         
         // Helpers
         addresses.post(AddressContent.self, at: "validate", use: validate)
+        addresses.post(AddressData.self, at: "parse", use: parse)
     }
     
     
@@ -44,6 +47,10 @@ final class AddressController: RouteCollection {
     
     func validate(_ request: Request, content: AddressContent)throws -> EventLoopFuture<HTTPStatus> {
         return self.validator.validate(address: content).transform(to: .ok)
+    }
+    
+    func parse(_ request: Request, content: AddressData)throws -> EventLoopFuture<AddressContent> {
+        return self.parser.parse(content)
     }
 }
 

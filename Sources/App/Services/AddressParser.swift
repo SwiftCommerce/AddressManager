@@ -3,7 +3,7 @@ import JSON
 
 // MARK: - Protocol
 
-struct AddressData: Codable {
+struct AddressData: Content {
     let country: String
     let data: String
 }
