@@ -44,6 +44,18 @@ final class SmartyStreetAddressParser: AddressParser {
         if ["united states", "us", "usa", "united states of america"].contains(data.country.lowercased()) {
             return self.unitedStates(data.data)
         } else {
+            guard self.supportInternational else {
+                let error = Abort(
+                    .badRequest,
+                    reason: "The service was not registered to handle international addresses",
+                    suggestedFixes: [
+                        "Set the `ADDRESS_SUPPORT_INTERNATIONAL` environment variable to `true`",
+                        "Make sure you have signed up for the SmartyStreet International Address API"
+                    ]
+                )
+                return self.client.container.future(error: error)
+            }
+            
             return self.international(data.data, forCountry: data.country)
         }
     }
