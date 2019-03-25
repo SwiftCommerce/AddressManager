@@ -224,7 +224,9 @@ final class SmartyStreetAddressParser: AddressParser {
                     numberSuffix: number?.suffix,
                     name: address.thoroughfare_name.string,
                     type: address.thoroughfare_type.string ?? address.thoroughfare_trailing_type.string,
-                    direction: (address.thoroughfare_predirection.string ?? address.thoroughfare_postdirection.string).flatMap(Direction.init(rawValue:))
+                    direction:
+                        (address.thoroughfare_predirection.string ??
+                        address.thoroughfare_postdirection.string).flatMap(Direction.init(rawValue:))
                 )
             )
         }
