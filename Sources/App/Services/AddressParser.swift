@@ -3,8 +3,13 @@ import JSON
 
 // MARK: - Protocol
 
+struct AddressData: Codable {
+    let country: String
+    let data: String
+}
+
 protocol AddressParser: ServiceType {
-    func parse(_ string: String, forCountry country: String) -> EventLoopFuture<AddressContent>
+    func parse(_ data: AddressData) -> EventLoopFuture<AddressContent>
 }
 
 // MARK: - Implementation
@@ -35,11 +40,11 @@ final class SmartyStreetAddressParser: AddressParser {
         self.unitedStatesAPI = "https://us-extract.api.smartystreets.com?auth-id=\(id)&auth-token=\(token)&html=false"
     }
     
-    func parse(_ string: String, forCountry country: String) -> EventLoopFuture<AddressContent> {
-        if ["united states", "us", "usa", "united states of america"].contains(country.lowercased()) {
-            return self.unitedStates(string)
+    func parse(_ data: AddressData) -> EventLoopFuture<AddressContent> {
+        if ["united states", "us", "usa", "united states of america"].contains(data.country.lowercased()) {
+            return self.unitedStates(data.data)
         } else {
-            return self.international(string, forCountry: country)
+            return self.international(data.data, forCountry: data.country)
         }
     }
     
