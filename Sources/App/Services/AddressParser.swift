@@ -158,7 +158,8 @@ final class SmartyStreetAddressParser: AddressParser {
                     numberSuffix: number?.suffix,
                     name: secondaryData.streetName.string,
                     type: address.components.street_suffix.string,
-                    direction: address.components.street_predirection.string.flatMap(Direction.init(rawValue:))
+                    direction: (address.components.street_predirection.string ??
+                                address.components.street_postdirection.string).flatMap(Direction.init(rawValue:))
                 )
             )
         }
