@@ -127,7 +127,7 @@ final class MySQLAddressRepository: AddressRepository {
                     guard var object = content.object, object.keys.filter({ $0 != "street"}) != [] else {
                         return conn.future()
                     }
-                    object["state"] = nil
+                    object["street"] = nil
                     return Address.query(on: transaction).filter(\.id == id).update(data: object)
                 }()
                 
