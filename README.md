@@ -25,11 +25,11 @@ ALTER USER root IDENTIFIED BY 'password';
 CREATE DATABASE address_manager;
 ```
 
-#### Google Geocoding API
+#### SmartyStreet API
 
-The default address validator uses the [Google Geocoding API](https://developers.google.com/maps/documentation/geocoding/start) to get location information based on the address passed to the service. If you want to use this validator, you will need an API key for the geocoding API. Otherwise you can implement your own validator.
+The default address validator and parser uses the [SmartyStreet API](https://smartystreets.com) to get location information based on the address passed to the service. If you want to use the validator/parser, you will need an API ID and token for the API. Otherwise you can implement your own validator.
 
-To get the API key, you can floow the instructions in the [API docs](https://developers.google.com/maps/documentation/geocoding/get-api-key). Then assign the key to an environment variable called `GOOGLE_MAPS_API_KEY`.
+Once you have the API keys, you can assign them to the `SMARTY_STREET_API_TOKEN` and `SMARTY_STREET_API_ID` environment variables. If you signed up for the internation address API, you can set the `ADDRESS_SUPPORT_INTERNATIONAL`  variable to `true` to enable international validation and parsing.
 
 #### Done
 
