@@ -104,7 +104,7 @@ final class SmartyStreetAddressParser: AddressParser {
                     reason: "Found more or less than 1 address in parsed results. Unable to disambiguate results."
                 )
             }
-            guard let address = json.addresses.0.api_output.optional else {
+            guard let address = json.addresses.0.api_output.0.optional else {
                 throw Abort(.badRequest, reason: "Unable to parse given address information.")
             }
             
