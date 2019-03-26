@@ -167,8 +167,15 @@ final class SmartyStreetAddressParser: AddressParser {
     
     private func international(_ string: String, forCountry country: String) -> EventLoopFuture<AddressContent> {
         let url = "\(self.internationalAPI)&freeform=\(string)&country=\(country)"
+        let request = Request(http: HTTPRequest(method: .GET, url: url), using: self.client.container)
         
-        return self.client.get(url).map { response -> AddressContent in
+        do {
+            try request.content.encode(string, as: .plainText)
+        } catch let error {
+            return self.client.container.future(error: error)
+        }
+        
+        return self.client.send(request).map { response -> AddressContent in
             let status = response.http.status
             guard status == .ok else {
                 let message: String
