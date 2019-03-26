@@ -132,6 +132,8 @@ final class SmartyStreetAddressParser: AddressParser {
                 case .string("Bldg"):
                     data.buildingName = address.components.secondary_number
                 default:
+                    // Exit the switch statement. We don't want to override P.O. Box information.
+                    if data.type != nil { break }
                     data.type = address.components.secondary_designator
                     data.typeIdentifier = address.components.secondary_number
                 }
