@@ -261,7 +261,11 @@ final class SmartyStreetAddressParser: AddressParser {
     
     private func streetNumber(_ number: String) -> (number: Int?, suffix: String?) {
         let elements = number.split(separator: " ").map(String.init)
-        return (elements.first.flatMap(Int.init), elements.last)
+        switch elements.count {
+        case 0: return (nil, nil)
+        case 1: return (elements.first.flatMap(Int.init), nil)
+        default: return (elements.first.flatMap(Int.init), elements.last)
+        }
     }
     
     struct SecondaryAddressData {
