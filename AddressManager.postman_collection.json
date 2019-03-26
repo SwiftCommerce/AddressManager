@@ -41,7 +41,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"city\": \"Cupertino\",\n\t\"district\": \"California\",\n\t\"postalArea\": \"95014\",\n\t\"buildingName\": \"Apple Campus\"\n}"
+					"raw": "{\n\t\"city\": \"Cupertino\",\n\t\"district\": \"California\",\n\t\"postalArea\": \"95014\",\n\t\"street\": {\n\t\t\"number\": 1,\n\t\t\"name\": \"Apple Park\",\n\t\t\"type\": \"Way\"\n\t}\n}"
 				},
 				"url": {
 					"raw": "http://localhost:8080/v1/addresses/",
@@ -233,21 +233,6 @@
 							"    var json = pm.response.json();",
 							"    pm.expect(json.country).to.eql(\"United States\");",
 							"});",
-							"",
-							"pm.test(\"Address.city is equal to 'Cupertino'\", function () {",
-							"    var json = pm.response.json();",
-							"    pm.expect(json.city).to.eql(\"Cupertino\");",
-							"});",
-							"",
-							"pm.test(\"Address.street.name is equal to 'Infinite'\", function () {",
-							"    var json = pm.response.json();",
-							"    pm.expect(json.street.name).to.eql(\"Infinite\");",
-							"});",
-							"",
-							"pm.test(\"Address.street.type is equal to 'Loop'\", function () {",
-							"    var json = pm.response.json();",
-							"    pm.expect(json.street.type).to.eql(\"Loop\");",
-							"});",
 							""
 						],
 						"type": "text/javascript"
@@ -266,7 +251,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"country\": \"United States\",\n\t\"street\": {\n\t\t\"name\": \"Infinite\",\n\t\t\"type\": \"Loop\"\n\t}\n}"
+					"raw": "{\n\t\"country\": \"United States\"\n}"
 				},
 				"url": {
 					"raw": "http://localhost:8080/v1/addresses/{{address}}",
@@ -448,7 +433,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"buildingName\": \"Apple Campus\",\n\t\"city\": \"Cupertino\",\n\t\"district\": \"California\",\n\t\"postalArea\": \"95014\"\n}"
+					"raw": "{\n\t\"city\": \"Cupertino\",\n\t\"district\": \"California\",\n\t\"postalArea\": \"95014\",\n\t\"street\": {\n\t\t\"number\": 1,\n\t\t\"name\": \"Apple Park\",\n\t\t\"type\": \"Way\"\n\t}\n}"
 				},
 				"url": {
 					"raw": "http://localhost:8080/v1/addresses/validate",
@@ -517,6 +502,98 @@
 					"body": null
 				}
 			]
+		},
+		{
+			"name": "Parse Address",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ad3030b6-1906-4ec0-8341-4bd1bd604497",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Address country is 'United States'\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.country).to.eql('United States');",
+							"});",
+							"",
+							"pm.test(\"Address postalArea is '10012'\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.postalArea).to.eql('10012');",
+							"});",
+							"",
+							"pm.test(\"Address district is 'NY'\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.district).to.eql('NY');",
+							"});",
+							"",
+							"pm.test(\"Address city is 'New York'\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.city).to.eql('New York');",
+							"});",
+							"",
+							"pm.test(\"Address street number is 39\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.street.number).to.eql(39);",
+							"});",
+							"",
+							"pm.test(\"Address street number suffix is '1/2'\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.street.numberSuffix).to.eql('1/2');",
+							"});",
+							"",
+							"pm.test(\"Address street name is 'Washington'\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.street.name).to.eql('Washington');",
+							"});",
+							"",
+							"pm.test(\"Address street type is 'Sq'\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.street.type).to.eql('Sq');",
+							"});",
+							"",
+							"pm.test(\"Address street direction is 'S'\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json.street.direction).to.eql('S');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"country\": \"United States\",\n\t\"data\": \"39 1/2 Washington Sq S, New York, NY 10012\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/addresses/parse",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"addresses",
+						"parse"
+					]
+				},
+				"description": "Parses a freeform address into an object containing individual address components."
+			},
+			"response": []
 		}
 	],
 	"event": [
