@@ -34,6 +34,7 @@ final class AddressControllerTests: XCTestCase {
         try self.update()
         try self.delete()
         try self.validate()
+        try self.parse()
     }
     
     func create()throws {
@@ -207,6 +208,27 @@ final class AddressControllerTests: XCTestCase {
         let kansasRequest = self.request(.POST, "validate", body: kansas)
         let kansasStatus = try self.app.response(for: kansasRequest).http.status
         XCTAssertEqual(kansasStatus, .failedDependency)
+    }
+    
+    func parse() throws {
+        caseStart()
+        defer { caseComplete() }
+        
+        let data = try JSONEncoder().encode(
+            AddressData(country: "United States", data: "39 1/2 Washington Sq S, New York, NY 10012")
+        )
+        let request = self.request(.POST, "parse", body: data)
+        let parsed = try self.app.response(for: request, as: AddressContent.self)
+        
+        XCTAssertEqual(parsed.country, "United States")
+        XCTAssertEqual(parsed.postalArea, "10012")
+        XCTAssertEqual(parsed.district, "NY")
+        XCTAssertEqual(parsed.city, "New York")
+        XCTAssertEqual(parsed.street?.number, 39)
+        XCTAssertEqual(parsed.street?.numberSuffix, "1/2")
+        XCTAssertEqual(parsed.street?.name, "Washington")
+        XCTAssertEqual(parsed.street?.type, "Sq")
+        XCTAssertEqual(parsed.street?.direction, .south)
     }
     
     // MARK: - Helpers
