@@ -124,11 +124,10 @@ final class MySQLAddressRepository: AddressRepository {
                     conn.future()
 
                 let address =  { () -> EventLoopFuture<Void> in
-                    guard var object = content.object, object.keys.filter({ $0 != "street"}) != [] else {
-                        return conn.future()
-                    }
-                    object["street"] = nil
-                    return Address.query(on: transaction).filter(\.id == id).update(data: object)
+                    var object = content
+                    object.remove(["street"])
+                    
+                    return object == [:] ? conn.future() : Address.query(on: transaction).filter(\.id == id).update(data: object)
                 }()
                 
                 let verifiedResult = address.and(street).catchMap { error in
