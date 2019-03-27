@@ -1,6 +1,6 @@
 import Vapor
 import Fluent
-import JSONKit
+import JSON
 
 final class AddressController: RouteCollection {
     let repository: AddressRepository
@@ -63,3 +63,5 @@ extension Request {
         return id
     }
 }
+
+extension JSON: Content { }
